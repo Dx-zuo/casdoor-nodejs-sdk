@@ -206,4 +206,30 @@ export class UserSDK {
   public async deleteUser(user: User) {
     return this.modifyUser('delete-user', user)
   }
+
+  public async setPassword(user: User, oldPassword: String, newPassword: String) {
+    if (!this.request) {
+      throw new Error('request init failed')
+    }
+
+    const url = `/api/set-password`
+    user.owner = this.config.orgName
+    const userInfo = JSON.stringify({
+      userOwner: this.config.orgName,
+      userName: user.name,
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+    });
+    return (await this.request.post(
+      url,
+      { userInfo },
+      {
+        params: {
+          id: `${user.owner}/${user.name}`,
+          clientId: this.config.clientId,
+          clientSecret: this.config.clientSecret,
+        },
+      },
+    )) as unknown as Promise<AxiosResponse<Record<string, unknown>>>
+  }
 }
